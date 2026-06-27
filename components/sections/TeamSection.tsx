@@ -6,6 +6,7 @@ export default function TeamSection() {
   const [visible, setVisible] = useState(false);
   const [btn1Hover, setBtn1Hover] = useState(false);
   const [btn2Hover, setBtn2Hover] = useState(false);
+  const [btn3Hover, setBtn3Hover] = useState(false);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -290,7 +291,9 @@ export default function TeamSection() {
           }}
         >
           <a
-            href="#"
+            href="https://github.com/SAI-RAHUL-ROKKAM/carbon_lens"
+            target="_blank"
+            rel="noopener noreferrer"
             onMouseEnter={() => setBtn1Hover(true)}
             onMouseLeave={() => setBtn1Hover(false)}
             style={{
@@ -322,6 +325,25 @@ export default function TeamSection() {
             }}
           >
             Brainovision
+          </a>
+          <a
+            href="https://www.linkedin.com/in/sai-rahul-rokkam-77b727387/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onMouseEnter={() => setBtn3Hover(true)}
+            onMouseLeave={() => setBtn3Hover(false)}
+            style={{
+              border: `1px solid ${btn3Hover ? "#0077B5" : "#E0E0E0"}`,
+              color: btn3Hover ? "#0077B5" : "#999",
+              borderRadius: "100px",
+              padding: "8px 20px",
+              fontFamily: "var(--font-body)",
+              fontSize: "12px",
+              textDecoration: "none",
+              transition: "all 200ms ease",
+            }}
+          >
+            LinkedIn
           </a>
         </div>
       </div>
