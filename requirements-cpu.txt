@@ -1,0 +1,56 @@
+# Python 3.12 CPU-only requirements for the AIGA book examples/labs
+# Install with:
+#   python -m pip install -r requirements-cpu.txt
+#
+# Note: This keeps everything CPU-safe. QLoRA/bitsandbytes GPU workflows are excluded.
+
+# Core scientific Python
+numpy>=2.0
+scipy>=1.13
+pandas>=2.2
+matplotlib>=3.8
+scikit-learn>=1.5
+
+# Deep learning frameworks - CPU usable
+torch>=2.3
+tensorflow>=2.16
+
+# NLP / embeddings / transformers
+gensim>=4.3
+transformers>=4.44
+sentence-transformers>=3.0
+tokenizers>=0.19
+accelerate>=0.33
+datasets>=2.20
+
+# Token counting and evaluation
+tiktoken>=0.7
+evaluate>=0.4
+bert-score>=0.3
+rouge-score>=0.1
+sacrebleu>=2.4
+
+# RAG / vector search / parsing helpers
+faiss-cpu>=1.8
+annoy>=1.17
+pdfplumber>=0.11
+beautifulsoup4>=4.12
+lxml>=5.2
+
+# Serving / streaming examples
+fastapi>=0.111
+uvicorn[standard]>=0.30
+httpx>=0.27
+requests>=2.32
+
+# Agentic AI / LangChain examples
+langchain>=0.2
+langchain-community>=0.2
+langchain-openai>=0.1
+openai>=1.40
+google-search-results>=2.4
+numexpr>=2.10
+
+# Optional RAG evaluation frameworks
+ragas>=0.1
+trulens>=1.0
