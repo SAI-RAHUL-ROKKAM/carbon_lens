@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
+import { leaderboardProjects } from "@/data/leaderboard";
 
 export default function AboutMission() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -123,10 +124,9 @@ export default function AboutMission() {
               ...fadeUp(240),
             }}
           >
-            CarbonLens changes that. We cross-reference every registered carbon
-            project against satellite imagery, run the methodology documents
-            through AI analysis, and surface the gaps — publicly, for free, for
-            anyone.
+            CarbonLens is a step toward that. We use satellite imagery and
+            AI analysis to flag suspicious projects and surface the gaps —
+            publicly, for free, for anyone.
           </p>
 
           {/* Stat pills */}
@@ -139,8 +139,8 @@ export default function AboutMission() {
             }}
           >
             {[
-              { value: "2,847+", label: "Projects Monitored", color: "#00E5A0" },
-              { value: "312", label: "Flagged High Risk", color: "#FF6B35" },
+              { value: String(leaderboardProjects.length), label: "Projects Monitored", color: "#00E5A0" },
+              { value: String(leaderboardProjects.filter(p => p.integrityScore < 40).length), label: "Flagged High Risk", color: "#FF6B35" },
               { value: "Free", label: "Always & Forever", color: "#4D9EFF" },
             ].map((stat) => (
               <div
@@ -220,7 +220,7 @@ export default function AboutMission() {
           <Card
             icon={<GlobeIcon />}
             title="Global Coverage"
-            body="Every project on the Verra VCS Registry is in our system — over 2,800 projects across 80+ countries."
+            body={`Search and analyze projects from the Verra VCS Registry — currently tracking ${leaderboardProjects.length} projects in the leaderboard.`}
             style={cardIn(600)}
           />
 

@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
+import { leaderboardProjects } from "@/data/leaderboard";
 
 export default function TeamSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -185,7 +186,7 @@ export default function TeamSection() {
                   flexWrap: "wrap",
                 }}
               >
-                {["Next.js 14", "Google Gemini", "Esri Satellite"].map(
+                {["Next.js", "Google Gemini", "Esri Satellite"].map(
                   (tag) => (
                     <span
                       key={tag}
@@ -251,7 +252,7 @@ export default function TeamSection() {
                       color: "#00E5A0",
                     }}
                   >
-                    2,847
+                    {leaderboardProjects.length}
                   </div>
                   <div
                     style={{

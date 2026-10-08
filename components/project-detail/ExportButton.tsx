@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { CarbonProject, IntegrityScore } from "@/types";
 import { generatePDFReport } from "@/lib/pdfExport";
 
@@ -9,7 +9,7 @@ interface ExportButtonProps {
   onExport?: () => void;
 }
 
-type ButtonState = "idle" | "loading" | "done";
+type ButtonState = "idle" | "loading" | "done" | "error";
 
 export default function ExportButton({
   project,
@@ -24,39 +24,54 @@ export default function ExportButton({
 
     setState("loading");
 
-    setTimeout(() => {
-      try {
-        generatePDFReport(project, score);
-      } catch (err) {
-        console.error("PDF export failed:", err);
-      }
-
+    // Run PDF generation immediately — no fake delay
+    try {
+      generatePDFReport(project, score);
       setState("done");
       onExport?.();
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      setState("error");
+    }
 
-      setTimeout(() => {
-        setState("idle");
-      }, 2000);
-    }, 1500);
+    setTimeout(() => {
+      setState("idle");
+    }, 2000);
   };
 
   const canClick = !!score && state === "idle";
 
+  const getLabel = () => {
+    switch (state) {
+      case "error":
+        return "Export failed — try again";
+      case "done":
+        return null; // shows checkmark
+      case "loading":
+        return null; // shows spinner
+      default:
+        return "Export Report";
+    }
+  };
+
   return (
     <button
       onClick={handleClick}
-      disabled={!score || state !== "idle"}
+      disabled={!score || state === "loading"}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
         width: "100%",
         padding: "14px",
         borderRadius: "100px",
-        background: !score
-          ? "var(--text-muted)"
-          : isHovered && canClick
-            ? "var(--accent-primary)"
-            : "#1A1D23",
+        background:
+          state === "error"
+            ? "var(--accent-warn)"
+            : !score
+              ? "var(--text-muted)"
+              : isHovered && canClick
+                ? "var(--accent-primary)"
+                : "#1A1D23",
         border: "none",
         color: "#FFFFFF",
         fontFamily: "var(--font-body)",
@@ -72,17 +87,10 @@ export default function ExportButton({
         transition: "background 200ms ease",
       }}
     >
-      {/* Idle text */}
-      <span
-        style={{
-          opacity: state === "idle" ? 1 : 0,
-          transition: "opacity 150ms ease",
-          position: state === "idle" ? "relative" : "absolute",
-          color: "#FFFFFF",
-        }}
-      >
-        Export Report
-      </span>
+      {/* Idle / Error text */}
+      {(state === "idle" || state === "error") && (
+        <span style={{ color: "#FFFFFF" }}>{getLabel()}</span>
+      )}
 
       {/* Loading spinner */}
       {state === "loading" && (

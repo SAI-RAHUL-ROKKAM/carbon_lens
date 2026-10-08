@@ -20,6 +20,7 @@ export default function SearchBar({ onSelectProject }: SearchBarProps) {
     handleInputChange,
     handleKeyDown,
     close,
+    setIsOpen,
   } = useSearch();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -82,7 +83,9 @@ export default function SearchBar({ onSelectProject }: SearchBarProps) {
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={handleKeyDownWrapper}
           onFocus={() => {
-            if (results.length > 0) close();
+            if (results.length > 0) {
+              setIsOpen(true);
+            }
           }}
           style={{
             width: "100%",

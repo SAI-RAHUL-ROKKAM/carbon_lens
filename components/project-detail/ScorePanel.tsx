@@ -7,21 +7,31 @@ interface ScorePanelProps {
   isLoading: boolean;
 }
 
+/** For good-is-high scores (Additionality, Community Impact) */
 function getBarColor(value: number): string {
   if (value > 60) return "var(--accent-primary)";
   if (value >= 40) return "#F5A623";
   return "var(--accent-warn)";
 }
 
+/** For risk scores where high = bad (Permanence Risk, Leakage Risk) */
+function getRiskBarColor(value: number): string {
+  if (value > 60) return "var(--accent-warn)";
+  if (value >= 40) return "#F5A623";
+  return "var(--accent-primary)";
+}
+
 interface ScoreRowProps {
   label: string;
   value: number;
   delay: number;
+  /** If true, use inverted colors (high = bad/red) */
+  isRisk?: boolean;
 }
 
-function ScoreRow({ label, value, delay }: ScoreRowProps) {
+function ScoreRow({ label, value, delay, isRisk = false }: ScoreRowProps) {
   const [visible, setVisible] = useState(false);
-  const color = getBarColor(value);
+  const color = isRisk ? getRiskBarColor(value) : getBarColor(value);
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), delay);
@@ -156,10 +166,10 @@ function DonutChart({ score }: { score: number }) {
 
 export default function ScorePanel({ score, isLoading }: ScorePanelProps) {
   const scoreRows = [
-    { label: "Additionality", key: "additionality" as const, delay: 0 },
-    { label: "Permanence Risk", key: "permanence" as const, delay: 50 },
-    { label: "Leakage Risk", key: "leakage" as const, delay: 100 },
-    { label: "Community Impact", key: "communityImpact" as const, delay: 150 },
+    { label: "Additionality", key: "additionality" as const, delay: 0, isRisk: false },
+    { label: "Permanence Risk", key: "permanence" as const, delay: 50, isRisk: true },
+    { label: "Leakage Risk", key: "leakage" as const, delay: 100, isRisk: true },
+    { label: "Community Impact", key: "communityImpact" as const, delay: 150, isRisk: false },
   ];
 
   return (
@@ -175,6 +185,9 @@ export default function ScorePanel({ score, isLoading }: ScorePanelProps) {
         }}
       >
         INTEGRITY ANALYSIS
+        <span style={{ fontFamily: "var(--font-body)", fontSize: "9px", color: "var(--text-muted)", marginLeft: "8px", letterSpacing: "0.08em" }}>
+          AI ESTIMATE
+        </span>
       </div>
 
       {isLoading ? (
@@ -222,6 +235,7 @@ export default function ScorePanel({ score, isLoading }: ScorePanelProps) {
               label={row.label}
               value={score[row.key]}
               delay={row.delay}
+              isRisk={row.isRisk}
             />
           ))}
           <DonutChart score={score.overallScore} />

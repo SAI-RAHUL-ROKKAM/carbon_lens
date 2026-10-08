@@ -42,10 +42,7 @@ export default function SatelliteSlider({
 
   // Resolve coordinates
   const resolvedCoords = coordinates ?? getCountryCoordinates(country);
-  const hasCoords = !!(
-    resolvedCoords &&
-    (resolvedCoords.lat !== 0 || resolvedCoords.lng !== 0)
-  );
+  const hasCoords = resolvedCoords !== null;
 
   const image2019Url = hasCoords
     ? getEsriTile(resolvedCoords!.lat, resolvedCoords!.lng, WAYBACK_2019)

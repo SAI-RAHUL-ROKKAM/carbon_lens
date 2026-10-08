@@ -18,6 +18,8 @@ export interface IntegrityScore {
   communityImpact: number;
   redFlags: RedFlag[];
   summary: string;
+  /** True when scores are estimated defaults (API key missing, Gemini failure, etc.) */
+  isDefault?: boolean;
 }
 
 export interface RedFlag {

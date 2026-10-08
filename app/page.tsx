@@ -95,7 +95,7 @@ export default function Home() {
     tl.call(() => { isTransitioning.current = false; });
   }, []);
 
-  // ── Scroll down on hero triggers the transition ──
+  // ── Scroll down on hero triggers the transition (wheel + touch + keyboard) ──
   useEffect(() => {
     if (!showHero || showIntro) return;
 
@@ -106,8 +106,41 @@ export default function Home() {
       }
     };
 
+    // Touch handling
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      const deltaY = touchStartY - e.changedTouches[0].clientY;
+      if (deltaY > 50) {
+        // Swiped up → advance
+        handleExplore();
+      }
+    };
+
+    // Keyboard handling
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === 'ArrowDown' ||
+        e.key === ' ' ||
+        e.key === 'PageDown'
+      ) {
+        e.preventDefault();
+        handleExplore();
+      }
+    };
+
     window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, [showHero, showIntro, handleExplore]);
 
   // ── Scroll up at top of globe → return to hero ──
@@ -250,6 +283,48 @@ export default function Home() {
     });
 
     wrapper.addEventListener('wheel', onWheel, { passive: false });
+
+    // Touch handling for mobile scroll
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const deltaY = touchStartY - e.touches[0].clientY;
+      touchStartY = e.touches[0].clientY;
+
+      // Scroll up at very top → return to hero
+      if (deltaY < 0 && targetScroll <= 0) {
+        handleReturnToHero();
+        return;
+      }
+
+      targetScroll += deltaY;
+      targetScroll = Math.max(0, Math.min(targetScroll, getScrollHeight()));
+    };
+
+    // Keyboard handling
+    const onKeyDown = (e: KeyboardEvent) => {
+      const STEP = 120;
+      if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        targetScroll += e.key === 'PageDown' ? window.innerHeight : STEP;
+        targetScroll = Math.min(targetScroll, getScrollHeight());
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        if (targetScroll <= 0) {
+          handleReturnToHero();
+          return;
+        }
+        targetScroll -= e.key === 'PageUp' ? window.innerHeight : STEP;
+        targetScroll = Math.max(0, targetScroll);
+      }
+    };
+
+    wrapper.addEventListener('touchstart', onTouchStart, { passive: true });
+    wrapper.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+
     rafId = requestAnimationFrame(update);
 
     // ── Section reveal animations with 3D camera feel ──
@@ -341,6 +416,9 @@ export default function Home() {
       clearTimeout(refreshTimer);
       cancelAnimationFrame(rafId);
       wrapper.removeEventListener('wheel', onWheel);
+      wrapper.removeEventListener('touchstart', onTouchStart);
+      wrapper.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', onResize);
       ctx.revert();
       ScrollTrigger.getAll().forEach((t) => t.kill());

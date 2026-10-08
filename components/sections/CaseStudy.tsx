@@ -49,11 +49,21 @@ export default function CaseStudy({ onViewKariba }: CaseStudyProps) {
     setPosition(pct);
   }, []);
 
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDragging.current || !sliderRef.current) return;
+    const rect = sliderRef.current.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const pct = Math.max(5, Math.min(95, (x / rect.width) * 100));
+    setPosition(pct);
+  }, []);
+
   const handleMouseUp = useCallback(() => {
     isDragging.current = false;
     window.removeEventListener("mousemove", handleMouseMove);
     window.removeEventListener("mouseup", handleMouseUp);
-  }, [handleMouseMove]);
+    window.removeEventListener("touchmove", handleTouchMove);
+    window.removeEventListener("touchend", handleMouseUp);
+  }, [handleMouseMove, handleTouchMove]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -66,13 +76,25 @@ export default function CaseStudy({ onViewKariba }: CaseStudyProps) {
     [handleMouseMove, handleMouseUp]
   );
 
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.stopPropagation();
+      isDragging.current = true;
+      window.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("touchend", handleMouseUp);
+    },
+    [handleTouchMove, handleMouseUp]
+  );
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleMouseUp);
     };
-  }, [handleMouseMove, handleMouseUp]);
+  }, [handleMouseMove, handleMouseUp, handleTouchMove]);
 
   return (
     <section
@@ -167,9 +189,9 @@ export default function CaseStudy({ onViewKariba }: CaseStudyProps) {
                 <strong style={{ color: "var(--text-primary)" }}>
                   Over-crediting at scale:
                 </strong>{" "}
-                Kariba issued 33.5M credits — satellite analysis showed actual
-                forest cover change was a fraction of claimed baseline
-                deforestation.
+                Kariba issued approximately 27M credits — but a Verra review
+                found that around 57% were issued in excess of what the project
+                could justify, indicating large-scale over-crediting.
               </p>
             </li>
             <li style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
@@ -196,9 +218,9 @@ export default function CaseStudy({ onViewKariba }: CaseStudyProps) {
                 <strong style={{ color: "var(--text-primary)" }}>
                   Inflated baselines:
                 </strong>{" "}
-                The project predicted 5× higher deforestation than actually
-                occurred, using a manipulated reference region approved by South
-                Pole.
+                Published investigations found the project used inflated
+                deforestation baselines, with a manipulated reference region
+                approved by South Pole.
               </p>
             </li>
             <li style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
@@ -425,6 +447,7 @@ export default function CaseStudy({ onViewKariba }: CaseStudyProps) {
             {/* Drag handle circle */}
             <div
               onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
               style={{
                 position: "absolute",
                 left: `${position}%`,
@@ -450,7 +473,19 @@ export default function CaseStudy({ onViewKariba }: CaseStudyProps) {
             </div>
           </div>
 
-          {/* Score preview */}
+          {/* Score preview — illustrative, not live AI */}
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-muted)",
+              marginBottom: "8px",
+            }}
+          >
+            ILLUSTRATIVE SCORES · NOT LIVE AI
+          </div>
           <div
             style={{
               display: "flex",

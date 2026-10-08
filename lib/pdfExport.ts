@@ -29,7 +29,7 @@ export function generatePDFReport(
   doc.text(`Country: ${project.country}`, 20, 65);
   doc.text(`Type: ${project.projectType}`, 20, 72);
   doc.text(
-    `Credits Issued: ${formatCredits(project.creditsIssued)} tonnes CO₂`,
+    `Credits Issued: ${formatCredits(project.creditsIssued)} tonnes CO2`,
     20,
     79
   );
@@ -57,17 +57,17 @@ export function generatePDFReport(
   doc.setFontSize(11);
   doc.setTextColor(60, 60, 60);
   const scores = [
-    { label: "Additionality", value: score.additionality },
-    { label: "Permanence Risk", value: score.permanence },
-    { label: "Leakage Risk", value: score.leakage },
-    { label: "Community Impact", value: score.communityImpact },
+    { label: "Additionality", value: score.additionality, isRisk: false },
+    { label: "Permanence Risk", value: score.permanence, isRisk: true },
+    { label: "Leakage Risk", value: score.leakage, isRisk: true },
+    { label: "Community Impact", value: score.communityImpact, isRisk: false },
   ];
 
   let y = 120;
   scores.forEach((s) => {
     doc.setTextColor(100, 100, 100);
     doc.text(s.label, 20, y);
-    const c = getScoreRGB(s.value);
+    const c = s.isRisk ? getRiskScoreRGB(s.value) : getScoreRGB(s.value);
     doc.setTextColor(c.r, c.g, c.b);
     doc.text(`${s.value}/100`, pageWidth - 45, y);
 
@@ -142,5 +142,12 @@ export function generatePDFReport(
 function getScoreRGB(score: number): { r: number; g: number; b: number } {
   if (score < 40) return { r: 255, g: 107, b: 53 };
   if (score < 70) return { r: 245, g: 166, b: 35 };
+  return { r: 0, g: 229, b: 160 };
+}
+
+/** Inverted: high risk = red */
+function getRiskScoreRGB(score: number): { r: number; g: number; b: number } {
+  if (score > 60) return { r: 255, g: 107, b: 53 };
+  if (score >= 40) return { r: 245, g: 166, b: 35 };
   return { r: 0, g: 229, b: 160 };
 }

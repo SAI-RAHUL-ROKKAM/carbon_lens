@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         country: String(item.country || item.region || "Unknown"),
         projectType: String(item.projectType || item.type || "Carbon Offset"),
         methodology: String(item.methodology || ""),
-        creditsIssued: Number(item.estimatedAnnualEmissionReductions || item.creditsIssued || 0),
+        creditsIssued: Number(item.creditsIssued || item.totalCreditsIssued || 0),
         proponent: String(item.proponentName || item.proponent || ""),
         coordinates: null,
         status: String(item.status || "Active"),

@@ -2,6 +2,7 @@
 
 import * as THREE from 'three';
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { leaderboardProjects } from '@/data/leaderboard';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -31,39 +32,7 @@ const AUTO_ROTATE_SPEED = 0.001;
 const PULSE_DURATION = 400;
 const FLY_TO_DURATION = 1200;
 
-const PROJECT_NAMES = [
-  'Amazon Basin REDD+',
-  'Congo Forest Reserve',
-  'Borneo Peatland',
-  'Guatemala Highlands',
-  'Peru Cloud Forest',
-  'Kenya Savanna',
-  'Madagascar Rainforest',
-  'Cambodia Mangrove',
-  'Myanmar Teak Reserve',
-  'Costa Rica Reforestation',
-  'Colombia Páramo',
-  'Tanzania Woodland',
-  'Ethiopia Highland',
-  'India Western Ghats',
-  'Vietnam Forest',
-  'Panama Canal Zone',
-  'Ecuador Chocó',
-  'Gabon Rainforest',
-  'Central African Forest',
-  'Sumatra Lowland',
-];
-
-/* Regional clusters — lat/lng with small random jitter per dot */
-const REGION_SEEDS: { center: [number, number]; count: number; jitter: number }[] = [
-  { center: [-3.0, -60.0], count: 8, jitter: 6 },   // Brazil / Amazon
-  { center: [0.5, 22.0], count: 8, jitter: 5 },      // Central Africa / Congo Basin
-  { center: [-2.0, 112.0], count: 8, jitter: 6 },    // Southeast Asia / Indonesia
-  { center: [14.0, -87.0], count: 5, jitter: 4 },    // Central America
-  { center: [-10.0, -75.0], count: 5, jitter: 4 },   // Peru / Andes
-  { center: [-1.0, 37.0], count: 4, jitter: 4 },     // East Africa
-  { center: [14.0, 76.0], count: 2, jitter: 3 },     // India
-];
+/* Project dots now come from real leaderboard data */
 
 /* ------------------------------------------------------------------ */
 /*  Continent polygon data (lat, lng)                                  */
@@ -307,28 +276,14 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-function generateDotPositions(): { lat: number; lng: number }[] {
-  const positions: { lat: number; lng: number }[] = [];
-  let seed = 42;
-  for (const region of REGION_SEEDS) {
-    for (let i = 0; i < region.count; i++) {
-      const latOffset = (seededRandom(seed++) - 0.5) * 2 * region.jitter;
-      const lngOffset = (seededRandom(seed++) - 0.5) * 2 * region.jitter;
-      positions.push({
-        lat: region.center[0] + latOffset,
-        lng: region.center[1] + lngOffset,
-      });
-    }
-  }
-  return positions;
-}
-
-function assignNames(count: number): string[] {
-  const names: string[] = [];
-  for (let i = 0; i < count; i++) {
-    names.push(PROJECT_NAMES[i % PROJECT_NAMES.length]);
-  }
-  return names;
+function generateDotPositions(): { name: string; lat: number; lng: number }[] {
+  return leaderboardProjects
+    .filter((p) => p.coordinates)
+    .map((p) => ({
+      name: p.name,
+      lat: p.coordinates!.lat,
+      lng: p.coordinates!.lng,
+    }));
 }
 
 /** Ease-in-out cubic */
@@ -486,7 +441,6 @@ export default function GlobeCanvas({ onDotClick, targetCoords }: GlobeCanvasPro
     /*  3. Project dots — glowing green spheres                        */
     /* ============================================================== */
     const dotPositions = generateDotPositions();
-    const names = assignNames(dotPositions.length);
     const dotGeo = new THREE.SphereGeometry(DOT_RADIUS, 16, 16);
     const dotMat = new THREE.MeshPhongMaterial({
       color: DOT_COLOR,
@@ -497,13 +451,13 @@ export default function GlobeCanvas({ onDotClick, targetCoords }: GlobeCanvasPro
     const dots: ProjectDot[] = [];
     disposables.push(dotGeo, dotMat);
 
-    dotPositions.forEach((pos, i) => {
+    dotPositions.forEach((pos) => {
       const vec = latLngToVector3(pos.lat, pos.lng, GLOBE_RADIUS + 2.5);
       const mesh = new THREE.Mesh(dotGeo, dotMat);
       mesh.position.copy(vec);
-      mesh.userData = { projectName: names[i], lat: pos.lat, lng: pos.lng };
+      mesh.userData = { projectName: pos.name, lat: pos.lat, lng: pos.lng };
       group.add(mesh);
-      dots.push({ name: names[i], lat: pos.lat, lng: pos.lng, mesh });
+      dots.push({ name: pos.name, lat: pos.lat, lng: pos.lng, mesh });
     });
     dotsRef.current = dots;
 

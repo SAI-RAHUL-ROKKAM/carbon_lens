@@ -34,7 +34,7 @@ export default function Footer() {
           textAlign: "center",
         }}
       >
-        Data from Verra VCS Registry · Satellite via Google Earth · AI by Gemini
+        Data from Verra VCS Registry · Satellite via Esri World Imagery · AI by Gemini
       </div>
 
       <div

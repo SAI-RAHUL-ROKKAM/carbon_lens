@@ -25,18 +25,21 @@ export default function ProjectDetail({
   const [isLoading, setIsLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [scoreError, setScoreError] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const fetchScore = useCallback(async (proj: CarbonProject) => {
-    // Check cache first
+    // Check cache first — only real (non-default) scores are cached
     const cached = scoreCache.get(proj.id);
     if (cached) {
       setScore(cached);
+      setScoreError(null);
       return;
     }
 
     setIsLoading(true);
     setScore(null);
+    setScoreError(null);
 
     try {
       const res = await fetch("/api/score", {
@@ -52,21 +55,24 @@ export default function ProjectDetail({
       });
 
       const data: IntegrityScore = await res.json();
-      scoreCache.set(proj.id, data);
-      setScore(data);
+
+      if (!res.ok || data.isDefault) {
+        // Show the default scores but flag them — do NOT cache
+        setScore(data);
+        setScoreError(
+          "AI scoring unavailable — displaying estimated defaults. These are not real analysis results."
+        );
+      } else {
+        // Only cache real scores
+        scoreCache.set(proj.id, data);
+        setScore(data);
+      }
     } catch (err) {
       console.error("Failed to fetch score:", err);
-      // Fallback score
-      const fallback: IntegrityScore = {
-        overallScore: 50,
-        additionality: 50,
-        permanence: 50,
-        leakage: 50,
-        communityImpact: 50,
-        redFlags: [],
-        summary: "Analysis unavailable — showing default scores.",
-      };
-      setScore(fallback);
+      setScoreError(
+        "Could not connect to scoring service. Please try again later."
+      );
+      setScore(null);
     } finally {
       setIsLoading(false);
     }
@@ -233,6 +239,24 @@ export default function ProjectDetail({
                 gap: "24px",
               }}
             >
+              {/* Error / default-scores warning */}
+              {scoreError && (
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    background: "rgba(255, 107, 53, 0.1)",
+                    border: "1px solid rgba(255, 107, 53, 0.3)",
+                    borderRadius: "4px",
+                    fontFamily: "var(--font-body)",
+                    fontSize: "12px",
+                    color: "var(--accent-warn)",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  ⚠ {scoreError}
+                </div>
+              )}
+
               {/* Score Panel */}
               <div style={{ flex: "0 0 auto" }}>
                 <ScorePanel score={score} isLoading={isLoading} />

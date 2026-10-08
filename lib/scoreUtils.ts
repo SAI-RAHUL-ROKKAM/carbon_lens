@@ -1,12 +1,12 @@
 export function getScoreColor(score: number): string {
   if (score < 40) return "var(--accent-warn)";
-  if (score < 70) return "#F5A623";
+  if (score < 60) return "#F5A623";
   return "var(--accent-primary)";
 }
 
 export function getScoreBg(score: number): string {
   if (score < 40) return "var(--accent-warn)";
-  if (score < 70) return "#F5A623";
+  if (score < 60) return "#F5A623";
   return "var(--accent-primary)";
 }
 
@@ -17,7 +17,7 @@ export function formatCredits(n: number): string {
   return n.toString();
 }
 
-export function getCountryCoordinates(country: string): { lat: number; lng: number } {
+export function getCountryCoordinates(country: string): { lat: number; lng: number } | null {
   const coords: Record<string, { lat: number; lng: number }> = {
     Zimbabwe: { lat: -19.015, lng: 29.154 },
     Peru: { lat: -9.19, lng: -75.015 },
@@ -44,6 +44,31 @@ export function getCountryCoordinates(country: string): { lat: number; lng: numb
     Ecuador: { lat: -1.831, lng: -78.183 },
     Philippines: { lat: 12.879, lng: 121.774 },
     Nigeria: { lat: 9.082, lng: 8.675 },
+    Rwanda: { lat: -1.94, lng: 29.87 },
+    Uganda: { lat: 1.37, lng: 32.29 },
+    Honduras: { lat: 14.1, lng: -87.2 },
+    Argentina: { lat: -38.416, lng: -63.617 },
+    Chile: { lat: -35.675, lng: -71.543 },
+    Bolivia: { lat: -16.29, lng: -63.588 },
+    "South Africa": { lat: -30.559, lng: 22.937 },
+    Zambia: { lat: -13.134, lng: 27.849 },
+    Ghana: { lat: 7.946, lng: -1.024 },
+    Cameroon: { lat: 7.369, lng: 12.354 },
+    Nepal: { lat: 28.394, lng: 84.124 },
+    Laos: { lat: 19.856, lng: 102.495 },
+    Malaysia: { lat: 4.21, lng: 101.976 },
+    Guyana: { lat: 4.861, lng: -58.93 },
+    Suriname: { lat: 3.919, lng: -56.028 },
+    Congo: { lat: -0.228, lng: 15.828 },
+    "Ivory Coast": { lat: 7.54, lng: -5.547 },
+    Liberia: { lat: 6.428, lng: -9.429 },
+    "Sierra Leone": { lat: 8.461, lng: -11.779 },
+    Belize: { lat: 17.19, lng: -88.497 },
+    Paraguay: { lat: -23.442, lng: -58.444 },
+    Nicaragua: { lat: 12.865, lng: -85.207 },
+    Panama: { lat: 8.538, lng: -80.782 },
+    "Dominican Republic": { lat: 18.736, lng: -70.163 },
+    Haiti: { lat: 18.971, lng: -72.285 },
   };
-  return coords[country] || { lat: 0, lng: 0 };
+  return coords[country] || null;
 }

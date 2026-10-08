@@ -31,11 +31,23 @@ const GlobeCanvas = dynamic(
   }
 );
 
+// Derive stats from actual leaderboard data instead of hardcoding
+const totalProjects = leaderboardProjects.length;
+const flaggedCount = leaderboardProjects.filter((p) => p.integrityScore < 40).length;
+const totalCredits = leaderboardProjects.reduce((sum, p) => sum + p.creditsIssued, 0);
+const avgScore = Math.round(
+  leaderboardProjects.reduce((sum, p) => sum + p.integrityScore, 0) / totalProjects
+);
+
 const stats = [
-  { value: '2,847', label: 'TOTAL PROJECTS MONITORED', color: 'var(--accent-primary)' },
-  { value: '1.2B', label: 'CREDITS ISSUED (TONNES CO₂)', color: 'var(--accent-primary)' },
-  { value: '312', label: 'FLAGGED HIGH RISK', color: 'var(--accent-warn)' },
-  { value: '61/100', label: 'AVERAGE INTEGRITY SCORE', color: 'var(--accent-primary)' },
+  { value: String(totalProjects), label: 'PROJECTS IN LEADERBOARD', color: 'var(--accent-primary)' },
+  {
+    value: totalCredits >= 1_000_000 ? `${(totalCredits / 1_000_000).toFixed(1)}M` : totalCredits.toLocaleString(),
+    label: 'CREDITS ISSUED (TONNES CO\u2082)',
+    color: 'var(--accent-primary)',
+  },
+  { value: String(flaggedCount), label: 'FLAGGED HIGH RISK (<40)', color: 'var(--accent-warn)' },
+  { value: `${avgScore}/100`, label: 'AVERAGE INTEGRITY SCORE', color: 'var(--accent-primary)' },
 ];
 
 interface GlobeDashboardProps {
@@ -66,7 +78,7 @@ export default function GlobeDashboard({
           methodology: result.methodology,
           creditsIssued: result.creditsIssued,
           proponent: result.proponent,
-          coordinates: coords,
+          coordinates: coords ?? undefined,
         });
       }, 1200);
     },
@@ -238,7 +250,7 @@ export default function GlobeDashboard({
             textAlign: 'center',
           }}
         >
-          40 active projects monitored · Verra VCS Registry
+          {totalProjects} leaderboard projects · Verra VCS Registry
         </div>
       </div>
 
