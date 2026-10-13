@@ -45,7 +45,7 @@ export default function Footer() {
           textAlign: "right",
         }}
       >
-        Built by Rahul · Brainovision Internship 2025
+        Built by Rahul · Brainovision Internship 2026
       </div>
     </footer>
   );

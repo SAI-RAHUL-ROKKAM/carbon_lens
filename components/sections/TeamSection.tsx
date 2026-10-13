@@ -155,7 +155,7 @@ export default function TeamSection() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Brainovision · 2025
+                Brainovision · 2026
               </div>
             </div>
 
